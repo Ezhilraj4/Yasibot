@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yasibot - AI Assistant</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #121212;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      height: 100vh;
+    }
+    .container {
+      padding: 20px;
+      flex-grow: 1;
+    }
+    .input-area {
+      display: flex;
+      align-items: center;
+      margin-top: 10px;
+      padding: 10px;
+      background-color: #2b2b2b;
+      border-radius: 25px;
+    }
+    input {
+      background-color: #3a3a3a;
+      border: none;
+      padding: 10px;
+      border-radius: 20px;
+      width: 100%;
+      color: white;
+    }
+    .buttons {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 20px;
+    }
+    .button {
+      background-color: #ff5722;
+      padding: 10px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      color: white;
+      text-align: center;
+      flex-grow: 1;
+      margin: 0 5px;
+    }
+    .button:hover {
+      background-color: #f44336;
+    }
+    .chat-box {
+      max-height: 60%;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+    .message {
+      margin-bottom: 10px;
+      padding: 12px;
+      background-color: #333;
+      border-radius: 8px;
+      max-width: 80%;
+    }
+    .user-message {
+      background-color: #3b8a9c;
+      text-align: right;
+    }
+    .bot-message {
+      background-color: #555;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="chat-box" id="chatBox">
+      <!-- Chat messages will go here -->
+    </div>
+    <div class="input-area">
+      <input type="text" id="userInput" placeholder="Ask anything..." oninput="updateButtonState()" />
+    </div>
+    <div class="buttons">
+      <div class="button" id="createImageButton" onclick="handleButtonClick('image')">Create Image</div>
+      <div class="button" id="summarizeButton" onclick="handleButtonClick('summarize')">Summarize Text</div>
+      <div class="button" id="brainstormButton" onclick="handleButtonClick('brainstorm')">Brainstorm</div>
+      <div class="button" id="askButton" onclick="askQuestion()">Ask</div>
+    </div>
+  </div>
+
+  <script>
+    // Function to handle button clicks
+    function handleButtonClick(action) {
+      const input = document.getElementById('userInput').value;
+      if (action === 'image') {
+        generateImage(input);
+      } else if (action === 'summarize') {
+        summarizeText(input);
+      } else if (action === 'brainstorm') {
+        brainstorm(input);
+      }
+    }
+
+    function askQuestion() {
+      const input = document.getElementById('userInput').value;
+      if (input.trim() === '') return;
+      appendMessage(input, 'user');
+      generateResponse(input);
+      document.getElementById('userInput').value = '';
+    }
+
+    function appendMessage(message, sender) {
+      const messageElement = document.createElement('div');
+      messageElement.classList.add('message', `${sender}-message`);
+      messageElement.textContent = message;
+      document.getElementById('chatBox').appendChild(messageElement);
+    }
+
+    function generateResponse(input) {
+      appendMessage("Thinking...", "bot");
+      
+      fetch('/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: input })
+      })
+      .then(response => response.json())
+      .then(data => {
+        const answer = data.answer || 'Sorry, I didn\'t get that.';
+        document.querySelector('.bot-message:last-child').textContent = answer;
+      })
+      .catch(() => {
+        document.querySelector('.bot-message:last-child').textContent = 'Error generating response.';
+      });
+    }
+
+    function generateImage(input) {
+      alert(`Creating image for: ${input}`);
+      // You can add code here to call an image generation API.
+    }
+
+    function summarizeText(input) {
+      alert(`Summarizing text: ${input}`);
+      // You can add code here to summarize the input.
+    }
+
+    function brainstorm(input) {
+      alert(`Brainstorming with: ${input}`);
+      // You can add brainstorming functionalities here.
+    }
+
+    function updateButtonState() {
+      const input = document.getElementById('userInput').value;
+      document.getElementById('askButton').disabled = !input.trim();
+    }
+  </script>
+
+</body>
+</html>
